@@ -380,59 +380,6 @@
   .field textarea { resize: none; min-height: 96px; }
   .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
 
-  /* TEST PANEL */
-  .test-panel {
-    position: fixed; bottom: 20px; right: 20px; z-index: 500;
-    display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
-  }
-  .test-toggle {
-    font-family: 'Montserrat', sans-serif;
-    font-size: 8px; font-weight: 700; letter-spacing: 0.4em;
-    text-transform: uppercase; cursor: pointer;
-    padding: 10px 18px;
-    background: #111; border: 1px solid var(--border);
-    color: var(--dim); transition: all .3s;
-  }
-  .test-toggle:hover { border-color: var(--white); color: var(--white); }
-  .test-box {
-    background: #0a0a0a; border: 1px solid var(--border);
-    padding: 24px; width: min(300px, 90vw); display: none;
-  }
-  .test-box.open { display: block; }
-  .test-box h5 {
-    font-size: 9px; font-weight: 700; letter-spacing: 0.45em;
-    text-transform: uppercase; margin-bottom: 18px; color: var(--white);
-  }
-  .test-result {
-    font-size: 10px; font-weight: 400; letter-spacing: 0.04em;
-    line-height: 1.8; margin-top: 14px; padding: 12px;
-    border: 1px solid var(--border); display: none; color: var(--dim);
-  }
-  .test-result.visible { display: block; }
-  .test-result.ok { border-color: #1a3a1a; color: #4caf50; }
-  .test-result.err { border-color: #3a1a1a; color: #f44336; }
-  .test-btn {
-    font-family: 'Montserrat', sans-serif;
-    font-size: 8px; font-weight: 700; letter-spacing: 0.4em;
-    text-transform: uppercase; cursor: pointer; width: 100%;
-    padding: 12px; margin-top: 4px;
-    background: var(--white); border: none; color: var(--black);
-    transition: opacity .3s;
-  }
-  .test-btn:hover { opacity: 0.85; }
-  .test-btn:disabled { opacity: 0.4; }
-  .test-field-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
-  .test-field-row label {
-    font-size: 8px; font-weight: 600; letter-spacing: 0.4em;
-    text-transform: uppercase; color: var(--dim);
-  }
-  .test-field-row input {
-    background: transparent; border: none;
-    border-bottom: 1px solid var(--border);
-    color: var(--white); outline: none; width: 100%;
-    font-family: 'Montserrat', sans-serif;
-    font-size: 11px; padding: 8px 0; cursor: auto;
-  }
 
   /* FOOTER */
   footer {
@@ -519,7 +466,6 @@
     .step:not(:first-child) { border-top: 1px solid var(--border); }
     .form-row { grid-template-columns: 1fr; gap: 20px; }
     .btn { font-size: 8px; padding: 13px 20px; letter-spacing: 0.3em; }
-    .test-panel { bottom: 12px; right: 12px; }
   }
 
   /* Very small */
@@ -749,27 +695,6 @@
   </ul>
 </footer>
 
-<!-- TEST PANEL — remove after confirming sheet works -->
-<div class="test-panel">
-  <button class="test-toggle" onclick="toggleTest()">⚙ Test Sheet</button>
-  <div class="test-box" id="testBox">
-    <h5>Google Sheets Integration Test</h5>
-    <div class="test-field-row">
-      <label>Test Name</label>
-      <input type="text" id="t_name" value="Test User" />
-    </div>
-    <div class="test-field-row">
-      <label>Test Email</label>
-      <input type="email" id="t_email" value="test@mxdelite.com" />
-    </div>
-    <div class="test-field-row">
-      <label>Test Message</label>
-      <input type="text" id="t_msg" value="Integration test — please ignore." />
-    </div>
-    <button class="test-btn" id="testBtn" onclick="runTest()">Send Test Row</button>
-    <div class="test-result" id="testResult"></div>
-  </div>
-</div>
 
 <script>
   // ── GOOGLE SHEETS URL ────────────────────────────────────────────────────
@@ -833,45 +758,6 @@
       .finally(() => {
         setTimeout(() => { btn.textContent = 'Send Message'; btn.disabled = false; }, 3500);
       });
-  }
-
-  // Test panel
-  function toggleTest() {
-    document.getElementById('testBox').classList.toggle('open');
-  }
-
-  function runTest() {
-    const btn = document.getElementById('testBtn');
-    const res = document.getElementById('testResult');
-    const fd  = new FormData();
-    fd.append('name',    document.getElementById('t_name').value  || 'Test User');
-    fd.append('email',   document.getElementById('t_email').value || 'test@mxdelite.com');
-    fd.append('message', document.getElementById('t_msg').value   || 'Integration test.');
-
-    btn.textContent = 'Sending...';
-    btn.disabled = true;
-    res.className = 'test-result visible';
-    res.textContent = 'Connecting to Google Sheets...';
-
-    const timer = setTimeout(() => {
-      res.className = 'test-result visible ok';
-      res.textContent = '✓ CORS blocked response (normal). Check your Sheet for the test row.';
-      btn.textContent = 'Send Test Row';
-      btn.disabled = false;
-    }, 5000);
-
-    fetch(scriptURL, { method: 'POST', body: fd })
-      .then(() => {
-        clearTimeout(timer);
-        res.className = 'test-result visible ok';
-        res.textContent = '✓ Success! Check your Google Sheet for the new row.';
-      })
-      .catch(() => {
-        clearTimeout(timer);
-        res.className = 'test-result visible ok';
-        res.textContent = '✓ Request sent (CORS blocked — normal). Check your Sheet for the test row.';
-      })
-      .finally(() => { btn.textContent = 'Send Test Row'; btn.disabled = false; });
   }
 </script>
 </body>
