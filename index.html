@@ -476,6 +476,12 @@
   }
 
 </style>
+
+<!-- Firebase CDN -->
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js"></script>
+<script src="firebase-config.js"></script>
+
 </head>
 <body>
 
@@ -759,6 +765,101 @@
         setTimeout(() => { btn.textContent = 'Send Message'; btn.disabled = false; }, 3500);
       });
   }
+
+  // Firebase CMS - Load content on page init
+  async function loadCMSContent() {
+    try {
+      const doc = await db.collection('content').doc('pages').get();
+      if (!doc.exists) {
+        console.log('No CMS content found, using defaults');
+        return;
+      }
+      
+      const data = doc.data();
+      
+      // Update hero section
+      if (data.hero) {
+        const heroEyebrow = document.querySelector('.hero-eyebrow');
+        const heroH1 = document.querySelector('.hero h1');
+        const heroSub = document.querySelector('.hero-sub');
+        const heroBtn = document.querySelector('.hero .btn');
+        
+        if (heroEyebrow && data.hero.eyebrow) heroEyebrow.textContent = data.hero.eyebrow;
+        if (heroH1 && data.hero.title) {
+          heroH1.innerHTML = `${data.hero.title}<span class="outline">${data.hero.outline || ''}</span>`;
+        }
+        if (heroSub && data.hero.subtitle) heroSub.textContent = data.hero.subtitle;
+        if (heroBtn && data.hero.buttonText) heroBtn.textContent = data.hero.buttonText;
+      }
+      
+      // Update services
+      if (data.services && Array.isArray(data.services)) {
+        const svcContainers = document.querySelectorAll('.svc');
+        data.services.forEach((svc, i) => {
+          if (svcContainers[i]) {
+            const h3 = svcContainers[i].querySelector('h3');
+            const p = svcContainers[i].querySelector('p');
+            if (h3 && svc.title) h3.textContent = svc.title;
+            if (p && svc.description) p.textContent = svc.description;
+          }
+        });
+      }
+      
+      // Update why section
+      if (data.why) {
+        const whyText = document.querySelector('.why-left p');
+        if (whyText && data.why.text) whyText.textContent = data.why.text;
+        
+        const stats = document.querySelectorAll('.stat-val');
+        if (stats[0] && data.why.stat1) stats[0].textContent = data.why.stat1;
+        if (stats[1] && data.why.stat2) stats[1].textContent = data.why.stat2;
+        if (stats[2] && data.why.stat3) stats[2].textContent = data.why.stat3;
+        if (stats[3] && data.why.stat4) stats[3].textContent = data.why.stat4;
+      }
+      
+      // Update process steps
+      if (data.process && Array.isArray(data.process)) {
+        const steps = document.querySelectorAll('.step');
+        data.process.forEach((step, i) => {
+          if (steps[i]) {
+            const h4 = steps[i].querySelector('h4');
+            const p = steps[i].querySelector('p');
+            if (h4 && step.title) h4.textContent = step.title;
+            if (p && step.description) p.textContent = step.description;
+          }
+        });
+      }
+      
+      // Update contact details
+      if (data.contact) {
+        const emailLink = document.querySelector('a[href^="mailto:"]');
+        const instaLink = document.querySelector('a[href*="instagram.com"]');
+        const locText = document.querySelectorAll('.cd-val')[2];
+        
+        if (emailLink && data.contact.email) {
+          emailLink.href = `mailto:${data.contact.email}`;
+          emailLink.textContent = data.contact.email;
+        }
+        if (instaLink && data.contact.instagram) {
+          instaLink.href = `https://instagram.com/${data.contact.instagram.replace('@', '')}`;
+          instaLink.textContent = data.contact.instagram;
+        }
+        if (locText && data.contact.location) locText.textContent = data.contact.location;
+      }
+      
+      // Update footer
+      if (data.footer && data.footer.copyright) {
+        const footerCopy = document.querySelector('.f-copy');
+        if (footerCopy) footerCopy.textContent = data.footer.copyright;
+      }
+      
+    } catch (err) {
+      console.warn('CMS not configured. Using hardcoded content.', err);
+    }
+  }
+  
+  // Load CMS content on page load
+  window.addEventListener('load', loadCMSContent);
 </script>
 </body>
 </html>
